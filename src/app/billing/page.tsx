@@ -63,15 +63,15 @@ export default function BillingPage() {
     <div className="max-w-5xl">
       <div className="text-emerald-500 font-mono text-xs tracking-widest mb-1">03 BILLING</div>
       <h1 className="text-2xl font-bold mb-1">Record a Zepto billing invoice</h1>
-      <p className="text-neutral-500 text-sm mb-6">
+      <p className="text-zinc-500 text-sm mb-6">
         Pick the PO the invoice bills against, confirm quantities per line, then post. Closing a PO is one-shot — any
         shortfall becomes demand for a future order, not a debt against this PO.
       </p>
 
       {!selected && (
-        <div className="bg-neutral-900 border border-neutral-800 rounded-lg overflow-hidden">
+        <div className="bg-zinc-950 border border-zinc-800 rounded-lg overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-neutral-800 text-neutral-400 text-left">
+            <thead className="bg-zinc-900 text-zinc-400 text-left">
               <tr>
                 <th className="p-2 pl-3">PO No</th>
                 <th className="p-2">Location</th>
@@ -83,13 +83,13 @@ export default function BillingPage() {
             <tbody>
               {pos.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-4 text-center text-neutral-500">
+                  <td colSpan={5} className="p-4 text-center text-zinc-500">
                     No open POs to bill.
                   </td>
                 </tr>
               )}
               {pos.map((po) => (
-                <tr key={po.po_no} className="border-t border-neutral-800">
+                <tr key={po.po_no} className="border-t border-zinc-800">
                   <td className="p-2 pl-3 font-mono">{po.po_no}</td>
                   <td className="p-2">{po.del_location}</td>
                   <td className="p-2 text-right">{po.lines.length}</td>
@@ -97,7 +97,7 @@ export default function BillingPage() {
                   <td className="p-2 pr-3 text-right">
                     <button
                       onClick={() => selectPo(po)}
-                      className="px-3 py-1 bg-emerald-700 hover:bg-emerald-600 rounded-md text-xs font-medium"
+                      className="px-3 py-1 bg-emerald-500 hover:bg-emerald-400 text-black rounded-md text-xs font-semibold"
                     >
                       Bill this PO
                     </button>
@@ -111,13 +111,13 @@ export default function BillingPage() {
 
       {selected && (
         <div>
-          <button onClick={() => setSelected(null)} className="text-neutral-500 hover:text-neutral-300 text-sm mb-4">
+          <button onClick={() => setSelected(null)} className="text-zinc-500 hover:text-zinc-300 text-sm mb-4">
             ← Back to open POs
           </button>
-          <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-4 mb-4">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 mb-4">
             <div className="font-mono font-semibold mb-3">{selected.po_no}</div>
             <table className="w-full text-sm">
-              <thead className="text-neutral-400 text-left">
+              <thead className="text-zinc-400 text-left">
                 <tr>
                   <th className="pb-2">Item</th>
                   <th className="pb-2 text-right">Ordered</th>
@@ -126,17 +126,17 @@ export default function BillingPage() {
               </thead>
               <tbody>
                 {selected.lines.map((l) => (
-                  <tr key={l.item_code} className="border-t border-neutral-800">
+                  <tr key={l.item_code} className="border-t border-zinc-800">
                     <td className="py-2">{l.tally_name}</td>
-                    <td className="py-2 text-right text-neutral-400">{l.qty_ordered}</td>
+                    <td className="py-2 text-right text-zinc-400">{l.qty_ordered}</td>
                     <td className="py-2 text-right pr-3">
                       <input
                         type="number"
                         step="1"
                         value={billed[l.item_code] ?? ""}
                         onChange={(e) => setBilled((b) => ({ ...b, [l.item_code]: e.target.value }))}
-                        className={`w-24 text-right bg-neutral-950 border rounded-md px-2 py-1 text-sm ${
-                          Number(billed[l.item_code]) < l.qty_ordered ? "border-amber-600 text-amber-300" : "border-neutral-700"
+                        className={`w-24 text-right bg-zinc-950 border rounded-md px-2 py-1 text-sm ${
+                          Number(billed[l.item_code]) < l.qty_ordered ? "border-amber-600 text-amber-300" : "border-zinc-700"
                         }`}
                       />
                     </td>
@@ -153,7 +153,7 @@ export default function BillingPage() {
                 value={invoiceNo}
                 onChange={(e) => setInvoiceNo(e.target.value)}
                 placeholder="MTQ-66"
-                className="w-full bg-neutral-900 border border-neutral-700 rounded-md px-3 py-2 text-sm"
+                className="w-full bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
               />
             </div>
             <div>
@@ -162,7 +162,7 @@ export default function BillingPage() {
                 type="date"
                 value={invoiceDate}
                 onChange={(e) => setInvoiceDate(e.target.value)}
-                className="w-full bg-neutral-900 border border-neutral-700 rounded-md px-3 py-2 text-sm"
+                className="w-full bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
               />
             </div>
             <div>
@@ -172,9 +172,9 @@ export default function BillingPage() {
                 step="0.01"
                 value={invoiceAmount}
                 onChange={(e) => setInvoiceAmount(e.target.value)}
-                className="w-full bg-neutral-900 border border-neutral-700 rounded-md px-3 py-2 text-sm"
+                className="w-full bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
               />
-              <div className="text-neutral-600 text-xs mt-1">Suggested from pre-tax unit cost — edit to match the actual tax invoice.</div>
+              <div className="text-zinc-600 text-xs mt-1">Suggested from pre-tax unit cost — edit to match the actual tax invoice.</div>
             </div>
           </div>
 
@@ -184,7 +184,7 @@ export default function BillingPage() {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="e.g. Filter Black Kretek billed at 159.36 — flag price variant"
-              className="w-full bg-neutral-900 border border-neutral-700 rounded-md px-3 py-2 text-sm"
+              className="w-full bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
             />
           </div>
 
@@ -193,7 +193,7 @@ export default function BillingPage() {
           <button
             onClick={commit}
             disabled={busy}
-            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 rounded-md font-semibold text-sm"
+            className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black disabled:opacity-50 rounded-md font-semibold text-sm"
           >
             {busy ? "Posting…" : "Post billing & close PO"}
           </button>

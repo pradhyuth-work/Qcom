@@ -61,15 +61,15 @@ export default function PaymentsPage() {
     <div className="max-w-4xl">
       <div className="text-emerald-500 font-mono text-xs tracking-widest mb-1">04 PAYMENTS</div>
       <h1 className="text-2xl font-bold mb-1">Reconcile an HSBC payment advice</h1>
-      <p className="text-neutral-500 text-sm mb-6">
+      <p className="text-zinc-500 text-sm mb-6">
         Match the payment to its outstanding invoice. A fully-settled invoice (payment + TDS) is removed from
         Outstanding entirely, not just marked paid.
       </p>
 
       {!selected && (
-        <div className="bg-neutral-900 border border-neutral-800 rounded-lg overflow-hidden">
+        <div className="bg-zinc-950 border border-zinc-800 rounded-lg overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-neutral-800 text-neutral-400 text-left">
+            <thead className="bg-zinc-900 text-zinc-400 text-left">
               <tr>
                 <th className="p-2 pl-3">Invoice</th>
                 <th className="p-2">Date</th>
@@ -80,20 +80,20 @@ export default function PaymentsPage() {
             <tbody>
               {invoices.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="p-4 text-center text-neutral-500">
+                  <td colSpan={4} className="p-4 text-center text-zinc-500">
                     No outstanding invoices.
                   </td>
                 </tr>
               )}
               {invoices.map((inv) => (
-                <tr key={inv.id} className="border-t border-neutral-800">
+                <tr key={inv.id} className="border-t border-zinc-800">
                   <td className="p-2 pl-3 font-mono">{inv.invoice_number}</td>
                   <td className="p-2">{inv.date_of_invoice}</td>
                   <td className="p-2 text-right pr-3">₹{inv.invoice_amount.toLocaleString("en-IN")}</td>
                   <td className="p-2 pr-3 text-right">
                     <button
                       onClick={() => selectInvoice(inv)}
-                      className="px-3 py-1 bg-emerald-700 hover:bg-emerald-600 rounded-md text-xs font-medium"
+                      className="px-3 py-1 bg-emerald-500 hover:bg-emerald-400 text-black rounded-md text-xs font-semibold"
                     >
                       Record payment
                     </button>
@@ -107,12 +107,12 @@ export default function PaymentsPage() {
 
       {selected && (
         <div>
-          <button onClick={() => setSelected(null)} className="text-neutral-500 hover:text-neutral-300 text-sm mb-4">
+          <button onClick={() => setSelected(null)} className="text-zinc-500 hover:text-zinc-300 text-sm mb-4">
             ← Back to outstanding
           </button>
-          <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-4 mb-4">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 mb-4">
             <div className="font-mono font-semibold mb-1">{selected.invoice_number}</div>
-            <div className="text-neutral-500 text-sm">Outstanding: ₹{selected.invoice_amount.toLocaleString("en-IN")}</div>
+            <div className="text-zinc-500 text-sm">Outstanding: ₹{selected.invoice_amount.toLocaleString("en-IN")}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-4">
@@ -123,7 +123,7 @@ export default function PaymentsPage() {
                 step="0.01"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full bg-neutral-900 border border-neutral-700 rounded-md px-3 py-2 text-sm"
+                className="w-full bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
               />
             </div>
             <div>
@@ -134,7 +134,7 @@ export default function PaymentsPage() {
                 value={tds}
                 onChange={(e) => setTds(e.target.value)}
                 placeholder="0"
-                className="w-full bg-neutral-900 border border-neutral-700 rounded-md px-3 py-2 text-sm"
+                className="w-full bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
               />
             </div>
             <div>
@@ -143,7 +143,7 @@ export default function PaymentsPage() {
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full bg-neutral-900 border border-neutral-700 rounded-md px-3 py-2 text-sm"
+                className="w-full bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
               />
             </div>
             <div>
@@ -152,12 +152,12 @@ export default function PaymentsPage() {
                 value={reference}
                 onChange={(e) => setReference(e.target.value)}
                 placeholder="HSBC advice ref / UTR"
-                className="w-full bg-neutral-900 border border-neutral-700 rounded-md px-3 py-2 text-sm"
+                className="w-full bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
               />
             </div>
           </div>
 
-          <div className="text-neutral-500 text-xs mb-4">
+          <div className="text-zinc-500 text-xs mb-4">
             Total settling this invoice: ₹{((Number(amount) || 0) + (Number(tds) || 0)).toLocaleString("en-IN")}
             {(Number(amount) || 0) + (Number(tds) || 0) < selected.invoice_amount - 0.5 && (
               <span className="text-amber-400"> — less than the outstanding amount; this will be recorded as a partial payment.</span>
@@ -169,7 +169,7 @@ export default function PaymentsPage() {
           <button
             onClick={post}
             disabled={busy}
-            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 rounded-md font-semibold text-sm"
+            className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black disabled:opacity-50 rounded-md font-semibold text-sm"
           >
             {busy ? "Posting…" : "Post payment"}
           </button>

@@ -48,7 +48,7 @@ export default function ReportsPage() {
     <div className="max-w-5xl">
       <div className="text-emerald-500 font-mono text-xs tracking-widest mb-1">05 REPORTS</div>
       <h1 className="text-2xl font-bold mb-1">Reports</h1>
-      <p className="text-neutral-500 text-sm mb-6">Pick a report and date range, then view it live or download as CSV.</p>
+      <p className="text-zinc-500 text-sm mb-6">Pick a report and date range, then view it live or download as CSV.</p>
 
       <div className="flex gap-3 items-end mb-6 flex-wrap">
         <div>
@@ -56,7 +56,7 @@ export default function ReportsPage() {
           <select
             value={type}
             onChange={(e) => setType(e.target.value as ReportType)}
-            className="bg-neutral-900 border border-neutral-700 rounded-md px-3 py-2 text-sm"
+            className="bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
           >
             <option value="sales">Sales pivot (by SKU, A→Z)</option>
             <option value="ledger">Stock ledger</option>
@@ -71,7 +71,7 @@ export default function ReportsPage() {
                 type="date"
                 value={start}
                 onChange={(e) => setStart(e.target.value)}
-                className="bg-neutral-900 border border-neutral-700 rounded-md px-3 py-2 text-sm"
+                className="bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
               />
             </div>
             <div>
@@ -80,25 +80,25 @@ export default function ReportsPage() {
                 type="date"
                 value={end}
                 onChange={(e) => setEnd(e.target.value)}
-                className="bg-neutral-900 border border-neutral-700 rounded-md px-3 py-2 text-sm"
+                className="bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
               />
             </div>
           </>
         )}
-        <button onClick={run} disabled={busy} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 rounded-md text-sm font-medium">
+        <button onClick={run} disabled={busy} className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-black disabled:opacity-50 rounded-md text-sm font-medium">
           {busy ? "Running…" : "Run report"}
         </button>
         {rows && rows.length > 0 && (
-          <button onClick={downloadCsv} className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 rounded-md text-sm font-medium">
+          <button onClick={downloadCsv} className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 rounded-md text-sm font-medium">
             ⬇ Download CSV
           </button>
         )}
       </div>
 
       {rows && (
-        <div className="bg-neutral-900 border border-neutral-800 rounded-lg overflow-hidden overflow-x-auto">
+        <div className="bg-zinc-950 border border-zinc-800 rounded-lg overflow-hidden overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-neutral-800 text-neutral-400 text-left">
+            <thead className="bg-zinc-900 text-zinc-400 text-left">
               <tr>
                 {columns.map((c) => (
                   <th key={c} className="p-2 pl-3 whitespace-nowrap">
@@ -110,13 +110,13 @@ export default function ReportsPage() {
             <tbody>
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={columns.length || 1} className="p-4 text-center text-neutral-500">
+                  <td colSpan={columns.length || 1} className="p-4 text-center text-zinc-500">
                     No rows in range.
                   </td>
                 </tr>
               )}
               {rows.map((r, i) => (
-                <tr key={i} className="border-t border-neutral-800">
+                <tr key={i} className="border-t border-zinc-800">
                   {columns.map((c) => (
                     <td key={c} className="p-2 pl-3 whitespace-nowrap">
                       {String(r[c] ?? "")}

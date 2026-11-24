@@ -89,34 +89,34 @@ export default function Inwarding() {
     <div className="max-w-3xl">
       <div className="text-emerald-500 font-mono text-xs tracking-widest mb-1">01 INWARDING</div>
       <h1 className="text-2xl font-bold mb-1">Record inventory purchase</h1>
-      <p className="text-neutral-500 text-sm mb-6">
+      <p className="text-zinc-500 text-sm mb-6">
         Post a GPI receipt and increase warehouse stock immediately. Quantities are in M (mille = 1000 sticks), same as the delivery note.
       </p>
 
       <div className="flex gap-3 mb-6">
         <button
           onClick={() => setShowBulk((v) => !v)}
-          className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 rounded-md text-sm font-medium"
+          className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 rounded-md text-sm font-medium"
         >
           ⬆ Bulk entry from CSV
         </button>
       </div>
 
       {showBulk && (
-        <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-4 mb-6">
-          <p className="text-neutral-400 text-xs mb-2">
-            One line per product: <code className="text-neutral-300">Item Code or Name, Qty in M</code>
+        <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 mb-6">
+          <p className="text-zinc-400 text-xs mb-2">
+            One line per product: <code className="text-zinc-300">Item Code or Name, Qty in M</code>
           </p>
           <textarea
             value={bulkText}
             onChange={(e) => setBulkText(e.target.value)}
             rows={6}
-            className="w-full bg-neutral-950 border border-neutral-700 rounded-md p-3 text-sm font-mono"
+            className="w-full bg-zinc-950 border border-zinc-700 rounded-md p-3 text-sm font-mono"
             placeholder={"IT01, 8.0\nIT33, 33.28"}
           />
           <button
             onClick={applyBulk}
-            className="mt-3 px-4 py-2 bg-emerald-700 hover:bg-emerald-600 rounded-md text-sm font-medium"
+            className="mt-3 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-black rounded-md text-sm font-semibold"
           >
             Parse into product list
           </button>
@@ -133,7 +133,7 @@ export default function Inwarding() {
               <select
                 value={line.itemCode}
                 onChange={(e) => updateLine(i, "itemCode", e.target.value)}
-                className="flex-1 bg-neutral-900 border border-neutral-700 rounded-md px-3 py-2 text-sm"
+                className="flex-1 bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
               >
                 <option value="">Select product…</option>
                 {items.map((it) => (
@@ -148,12 +148,12 @@ export default function Inwarding() {
                 value={line.qtyM}
                 onChange={(e) => updateLine(i, "qtyM", e.target.value)}
                 placeholder="Qty (M)"
-                className="w-32 bg-neutral-900 border border-neutral-700 rounded-md px-3 py-2 text-sm"
+                className="w-32 bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
               />
               {item && (
-                <span className="text-neutral-600 text-xs w-28">→ {projectedM}M</span>
+                <span className="text-zinc-600 text-xs w-28">→ {projectedM}M</span>
               )}
-              <button onClick={() => removeLine(i)} className="text-neutral-500 hover:text-red-400 px-2">
+              <button onClick={() => removeLine(i)} className="text-zinc-500 hover:text-red-400 px-2">
                 ✕
               </button>
             </div>
@@ -167,24 +167,24 @@ export default function Inwarding() {
       <div className="mb-6">
         <label className="flex justify-between text-sm mb-1">
           <span>Supplier / bill reference</span>
-          <span className="text-neutral-500">Optional</span>
+          <span className="text-zinc-500">Optional</span>
         </label>
         <input
           value={reference}
           onChange={(e) => setReference(e.target.value)}
           placeholder="e.g. GPI invoice number, or leave blank if not legible"
-          className="w-full bg-neutral-900 border border-neutral-700 rounded-md px-3 py-2 text-sm"
+          className="w-full bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
         />
       </div>
 
-      <p className="text-neutral-500 text-xs mb-3">Every line is posted together — if one fails, none are applied.</p>
+      <p className="text-zinc-500 text-xs mb-3">Every line is posted together — if one fails, none are applied.</p>
 
       {status && <div className="mb-4 text-sm text-amber-300">{status}</div>}
 
       <button
         onClick={submit}
         disabled={posting}
-        className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 rounded-md font-semibold text-sm"
+        className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black disabled:opacity-50 rounded-md font-semibold text-sm"
       >
         {posting ? "Posting…" : "Post purchase inward"}
       </button>
