@@ -34,10 +34,11 @@ export default function OrdersPage() {
   async function place() {
     if (!result) return;
     setPlacing(true);
+    const orderLines = result.lines.filter((l) => l.order_packs > 0);
     const res = await fetch("/api/gpi-order/place", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lines: result.lines, totalM: result.totalM }),
+      body: JSON.stringify({ lines: orderLines, totalM: result.totalM }),
     });
     const data = await res.json();
     setPlacing(false);

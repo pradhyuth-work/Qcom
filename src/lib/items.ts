@@ -33,8 +33,12 @@ export function getItemByCode(code: string): Item | undefined {
 
 /**
  * A physical item can have a different SKU description per customer (Zepto, Blinkit, etc).
- * A couple of SKU descriptions are shared between a tracked item and an untracked legacy
- * code in the source catalog -- prefer the tracked one when there's more than one match.
+ * A couple of SKU descriptions are shared between a real, actively-priced item and an
+ * untracked legacy code in the source catalog that happens to carry stale leftover stock
+ * (e.g. IT05 "VISTA" vs IT16 "DOUBLE FUSION" both map to the same Zepto SKU Desc text).
+ * `tracked` alone isn't a reliable tiebreak -- a legacy code can look "tracked" just because
+ * it has nonzero stock. Prefer whichever match actually has pricing data (the real, currently
+ * ordered SKU), then fall back to `tracked`.
  */
 export function findItemByCustomerSkuDesc(customerId: number, skuDesc: string): Item | undefined {
   return db
@@ -42,7 +46,7 @@ export function findItemByCustomerSkuDesc(customerId: number, skuDesc: string): 
       `SELECT i.* FROM items i
        JOIN item_customer_codes icc ON icc.item_code = i.item_code
        WHERE icc.customer_id = ? AND icc.sku_desc = ? COLLATE NOCASE
-       ORDER BY i.tracked DESC LIMIT 1`
+       ORDER BY (i.unit_base_cost IS NOT NULL) DESC, i.tracked DESC LIMIT 1`
     )
     .get(customerId, skuDesc.trim()) as Item | undefined;
 }

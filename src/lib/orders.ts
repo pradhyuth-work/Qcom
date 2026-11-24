@@ -72,7 +72,6 @@ export function computeGpiOrder(): { lines: ComputedOrderLine[]; totalM: number;
     const stock = stockByCode[item.item_code] ?? 0;
     const raw = Math.max(0, d + buffer - stock);
     const orderPacks = roundToNearest(raw, 20);
-    if (orderPacks <= 0) continue;
     const orderM = packsToM(item.item_code, orderPacks);
     totalM += orderM;
     lines.push({
