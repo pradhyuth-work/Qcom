@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Badge, btnPrimary, Callout, Card, PageHeader } from "@/components/ui";
 
 type PoImportResult = {
   poNo: string;
@@ -52,34 +53,37 @@ export default function PoIntakePage() {
 
   return (
     <div className="max-w-4xl">
-      <div className="text-emerald-500 font-mono text-xs tracking-widest mb-1">00 PO INTAKE</div>
-      <h1 className="text-2xl font-bold mb-1">Import Zepto purchase orders</h1>
-      <p className="text-zinc-500 text-sm mb-6">Upload the PO export CSV. Every PO is checked before anything is committed.</p>
+      <PageHeader
+        title="Import purchase orders"
+        description="Upload the Zepto PO export CSV. Every PO is checked against what's already on file before anything is committed — nothing is overwritten silently."
+      />
 
       {!results && (
-        <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-6">
-          <input
-            type="file"
-            accept=".csv"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="text-sm mb-4"
-          />
-          <div>
-            <button
-              onClick={preview}
-              disabled={!file || busy}
-              className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black disabled:opacity-50 rounded-md font-semibold text-sm"
-            >
+        <Card className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-semibold flex items-center justify-center">1</span>
+            <span className="text-sm font-medium text-slate-700">Choose the PO CSV file</span>
+          </div>
+          <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-300 rounded-lg py-10 cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/30 transition-colors">
+            <input type="file" accept=".csv" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="hidden" />
+            <span className="text-sm text-slate-500">{file ? file.name : "Click to choose a .csv file, or drag it here"}</span>
+          </label>
+          <div className="mt-5">
+            <button onClick={preview} disabled={!file || busy} className={btnPrimary}>
               {busy ? "Reading…" : "Preview import"}
             </button>
           </div>
-        </div>
+        </Card>
       )}
 
       {results && committed === null && (
         <div className="space-y-3">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-semibold flex items-center justify-center">2</span>
+            <span className="text-sm font-medium text-slate-700">Review and select which POs to commit</span>
+          </div>
           {results.map((r) => (
-            <div key={r.poNo} className="bg-zinc-950 border border-zinc-800 rounded-lg p-4">
+            <Card key={r.poNo} className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   {(r.action === "created" || r.action === "conflict") && (
@@ -87,71 +91,72 @@ export default function PoIntakePage() {
                       type="checkbox"
                       checked={!!selected[r.poNo]}
                       onChange={(e) => setSelected((s) => ({ ...s, [r.poNo]: e.target.checked }))}
+                      className="w-4 h-4 accent-emerald-600"
                     />
                   )}
-                  <span className="font-mono font-semibold">{r.poNo}</span>
-                  <Badge action={r.action} />
+                  <span className="font-semibold text-slate-900">{r.poNo}</span>
+                  <StatusBadge action={r.action} />
                 </div>
-                <span className="text-zinc-500 text-sm">{r.lineCount} lines</span>
+                <span className="text-slate-400 text-sm">{r.lineCount} line items</span>
               </div>
               {r.action === "conflict" && r.diff && (
-                <div className="mt-3 bg-amber-950/30 border border-amber-800/50 rounded-md p-3 text-sm">
-                  <div className="text-amber-300 font-medium mb-2">
-                    This PO already exists with different quantities — check the checkbox to overwrite with this CSV&apos;s version:
-                  </div>
-                  <table className="w-full text-xs">
-                    <thead className="text-zinc-400">
-                      <tr>
-                        <th className="text-left pb-1">Item</th>
-                        <th className="text-right pb-1">Existing</th>
-                        <th className="text-right pb-1">New</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {r.diff.map((d) => (
-                        <tr key={d.itemCode}>
-                          <td>{d.tallyName}</td>
-                          <td className="text-right">{d.existingQty}</td>
-                          <td className="text-right text-amber-300">{d.newQty}</td>
+                <div className="mt-3">
+                  <Callout tone="amber">
+                    <div className="font-medium mb-2">
+                      This PO already exists with different quantities — check the box above to overwrite with this CSV&apos;s version:
+                    </div>
+                    <table className="w-full text-xs">
+                      <thead className="text-amber-700/70">
+                        <tr>
+                          <th className="text-left pb-1 font-medium">Item</th>
+                          <th className="text-right pb-1 font-medium">Existing</th>
+                          <th className="text-right pb-1 font-medium">New</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {r.diff.map((d) => (
+                          <tr key={d.itemCode}>
+                            <td className="py-0.5">{d.tallyName}</td>
+                            <td className="text-right py-0.5">{d.existingQty}</td>
+                            <td className="text-right py-0.5 font-semibold">{d.newQty}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </Callout>
                 </div>
               )}
               {r.unmatchedSkus && r.unmatchedSkus.length > 0 && (
-                <div className="mt-2 text-xs text-red-400">
-                  Unmatched SKU(s), skipped: {r.unmatchedSkus.join("; ")}
+                <div className="mt-2">
+                  <Callout tone="red">Unmatched SKU(s), skipped: {r.unmatchedSkus.join("; ")}</Callout>
                 </div>
               )}
-            </div>
+            </Card>
           ))}
-          <button
-            onClick={commit}
-            disabled={busy || Object.values(selected).every((v) => !v)}
-            className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black disabled:opacity-50 rounded-md font-semibold text-sm"
-          >
-            {busy ? "Committing…" : "Commit selected POs"}
-          </button>
+          <div className="pt-2">
+            <button onClick={commit} disabled={busy || Object.values(selected).every((v) => !v)} className={btnPrimary}>
+              {busy ? "Committing…" : "Commit selected POs"}
+            </button>
+          </div>
         </div>
       )}
 
       {committed !== null && (
-        <div className="bg-emerald-950/50 border border-emerald-800 rounded-lg p-4 text-emerald-300 text-sm">
-          {committed} PO(s) imported. Go to GPI Order to compute the next supplier order.
-        </div>
+        <Callout tone="emerald">
+          {committed} PO(s) imported successfully. Head to <strong>GPI Order</strong> to compute the next supplier order.
+        </Callout>
       )}
     </div>
   );
 }
 
-function Badge({ action }: { action: PoImportResult["action"] }) {
+function StatusBadge({ action }: { action: PoImportResult["action"] }) {
   const map = {
-    created: ["New", "bg-emerald-900/50 text-emerald-300"],
-    identical: ["Already imported, unchanged", "bg-zinc-900 text-zinc-400"],
-    conflict: ["Lines differ from what we have", "bg-amber-900/50 text-amber-300"],
-    skipped_closed: ["Already billed/closed — skipped", "bg-zinc-900 text-zinc-500"],
+    created: ["New", "emerald"],
+    identical: ["Already imported, unchanged", "neutral"],
+    conflict: ["Lines differ from what we have", "amber"],
+    skipped_closed: ["Already billed/closed — skipped", "neutral"],
   } as const;
-  const [label, cls] = map[action];
-  return <span className={`text-xs px-2 py-0.5 rounded ${cls}`}>{label}</span>;
+  const [label, tone] = map[action];
+  return <Badge tone={tone}>{label}</Badge>;
 }

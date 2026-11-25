@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { btnPrimary, btnGhost, Callout, Card, EmptyState, inputClass, Label, PageHeader, thClass, tdClass, trClass } from "@/components/ui";
 
 type Line = { item_code: string; tally_name: string; sku_desc: string | null; qty_ordered: number; unit_base_cost: number | null };
 type OpenPo = { po_no: string; po_date: string | null; del_location: string | null; po_amount: number | null; lines: Line[] };
@@ -61,44 +62,39 @@ export default function BillingPage() {
 
   return (
     <div className="max-w-5xl">
-      <div className="text-emerald-500 font-mono text-xs tracking-widest mb-1">03 BILLING</div>
-      <h1 className="text-2xl font-bold mb-1">Record a Zepto billing invoice</h1>
-      <p className="text-zinc-500 text-sm mb-6">
-        Pick the PO the invoice bills against, confirm quantities per line, then post. Closing a PO is one-shot — any
-        shortfall becomes demand for a future order, not a debt against this PO.
-      </p>
+      <PageHeader
+        title="Record a billing invoice"
+        description="Pick the PO the invoice bills against, confirm quantities per line, then post. Closing a PO is one-shot — any shortfall becomes demand for a future order, not a debt against this PO."
+      />
 
       {!selected && (
-        <div className="bg-zinc-950 border border-zinc-800 rounded-lg overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-zinc-900 text-zinc-400 text-left">
+        <Card className="overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="p-2 pl-3">PO No</th>
-                <th className="p-2">Location</th>
-                <th className="p-2 text-right">Lines</th>
-                <th className="p-2 text-right pr-3">PO Amount</th>
-                <th className="p-2 pr-3"></th>
+                <th className={thClass}>PO No</th>
+                <th className={thClass}>Location</th>
+                <th className={`${thClass} text-right`}>Lines</th>
+                <th className={`${thClass} text-right`}>PO Amount</th>
+                <th className={thClass}></th>
               </tr>
             </thead>
             <tbody>
               {pos.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-4 text-center text-zinc-500">
-                    No open POs to bill.
+                  <td colSpan={5}>
+                    <EmptyState>No open POs to bill.</EmptyState>
                   </td>
                 </tr>
               )}
               {pos.map((po) => (
-                <tr key={po.po_no} className="border-t border-zinc-800">
-                  <td className="p-2 pl-3 font-mono">{po.po_no}</td>
-                  <td className="p-2">{po.del_location}</td>
-                  <td className="p-2 text-right">{po.lines.length}</td>
-                  <td className="p-2 text-right pr-3">{po.po_amount?.toLocaleString("en-IN")}</td>
-                  <td className="p-2 pr-3 text-right">
-                    <button
-                      onClick={() => selectPo(po)}
-                      className="px-3 py-1 bg-emerald-500 hover:bg-emerald-400 text-black rounded-md text-xs font-semibold"
-                    >
+                <tr key={po.po_no} className={trClass}>
+                  <td className={`${tdClass} font-medium text-slate-900`}>{po.po_no}</td>
+                  <td className={tdClass}>{po.del_location}</td>
+                  <td className={`${tdClass} text-right tabular-nums`}>{po.lines.length}</td>
+                  <td className={`${tdClass} text-right tabular-nums`}>{po.po_amount?.toLocaleString("en-IN")}</td>
+                  <td className={`${tdClass} text-right`}>
+                    <button onClick={() => selectPo(po)} className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-semibold transition-colors">
                       Bill this PO
                     </button>
                   </td>
@@ -106,95 +102,85 @@ export default function BillingPage() {
               ))}
             </tbody>
           </table>
-        </div>
+        </Card>
       )}
 
       {selected && (
-        <div>
-          <button onClick={() => setSelected(null)} className="text-zinc-500 hover:text-zinc-300 text-sm mb-4">
+        <div className="space-y-5">
+          <button onClick={() => setSelected(null)} className={btnGhost}>
             ← Back to open POs
           </button>
-          <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 mb-4">
-            <div className="font-mono font-semibold mb-3">{selected.po_no}</div>
-            <table className="w-full text-sm">
-              <thead className="text-zinc-400 text-left">
-                <tr>
-                  <th className="pb-2">Item</th>
-                  <th className="pb-2 text-right">Ordered</th>
-                  <th className="pb-2 text-right pr-3">Billed qty</th>
+
+          <Card className="p-5">
+            <div className="font-semibold text-slate-900 mb-3">{selected.po_no}</div>
+            <table className="w-full">
+              <thead>
+                <tr className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  <th className="text-left pb-2">Item</th>
+                  <th className="text-right pb-2">Ordered</th>
+                  <th className="text-right pb-2">Billed qty</th>
                 </tr>
               </thead>
               <tbody>
-                {selected.lines.map((l) => (
-                  <tr key={l.item_code} className="border-t border-zinc-800">
-                    <td className="py-2">{l.tally_name}</td>
-                    <td className="py-2 text-right text-zinc-400">{l.qty_ordered}</td>
-                    <td className="py-2 text-right pr-3">
-                      <input
-                        type="number"
-                        step="1"
-                        value={billed[l.item_code] ?? ""}
-                        onChange={(e) => setBilled((b) => ({ ...b, [l.item_code]: e.target.value }))}
-                        className={`w-24 text-right bg-zinc-950 border rounded-md px-2 py-1 text-sm ${
-                          Number(billed[l.item_code]) < l.qty_ordered ? "border-amber-600 text-amber-300" : "border-zinc-700"
-                        }`}
-                      />
-                    </td>
-                  </tr>
-                ))}
+                {selected.lines.map((l) => {
+                  const short = Number(billed[l.item_code]) < l.qty_ordered;
+                  return (
+                    <tr key={l.item_code} className="border-t border-slate-100">
+                      <td className="py-2.5 text-sm">{l.tally_name}</td>
+                      <td className="py-2.5 text-right text-sm text-slate-500 tabular-nums">{l.qty_ordered}</td>
+                      <td className="py-2.5 text-right">
+                        <input
+                          type="number"
+                          step="1"
+                          value={billed[l.item_code] ?? ""}
+                          onChange={(e) => setBilled((b) => ({ ...b, [l.item_code]: e.target.value }))}
+                          className={`w-24 text-right rounded-lg px-2 py-1.5 text-sm border tabular-nums focus:outline-none focus:ring-2 focus:ring-emerald-500/40 ${
+                            short ? "border-amber-400 bg-amber-50 text-amber-800" : "border-slate-300"
+                          }`}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
-          </div>
+          </Card>
 
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            <div>
-              <label className="text-sm block mb-1">Invoice No (MTQ-NN)</label>
+          <Card className="p-5">
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label>Invoice No (MTQ-NN)</Label>
+                <input value={invoiceNo} onChange={(e) => setInvoiceNo(e.target.value)} placeholder="MTQ-66" className={inputClass} />
+              </div>
+              <div>
+                <Label>Invoice Date</Label>
+                <input type="date" value={invoiceDate} onChange={(e) => setInvoiceDate(e.target.value)} className={inputClass} />
+              </div>
+              <div>
+                <Label hint="Pre-tax suggestion — edit to match invoice">Invoice Amount (₹)</Label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={invoiceAmount}
+                  onChange={(e) => setInvoiceAmount(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+            </div>
+            <div className="mt-4">
+              <Label hint="Optional">Notes</Label>
               <input
-                value={invoiceNo}
-                onChange={(e) => setInvoiceNo(e.target.value)}
-                placeholder="MTQ-66"
-                className="w-full bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="e.g. Filter Black Kretek billed at 159.36 — flag price variant"
+                className={inputClass}
               />
             </div>
-            <div>
-              <label className="text-sm block mb-1">Invoice Date</label>
-              <input
-                type="date"
-                value={invoiceDate}
-                onChange={(e) => setInvoiceDate(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-sm block mb-1">Invoice Amount (₹)</label>
-              <input
-                type="number"
-                step="0.01"
-                value={invoiceAmount}
-                onChange={(e) => setInvoiceAmount(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
-              />
-              <div className="text-zinc-600 text-xs mt-1">Suggested from pre-tax unit cost — edit to match the actual tax invoice.</div>
-            </div>
-          </div>
+          </Card>
 
-          <div className="mb-4">
-            <label className="text-sm block mb-1">Notes (optional)</label>
-            <input
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="e.g. Filter Black Kretek billed at 159.36 — flag price variant"
-              className="w-full bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
-            />
-          </div>
+          {status && <Callout tone={status.startsWith("Error") ? "red" : "emerald"}>{status}</Callout>}
 
-          {status && <div className="mb-4 text-sm text-amber-300">{status}</div>}
-
-          <button
-            onClick={commit}
-            disabled={busy}
-            className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black disabled:opacity-50 rounded-md font-semibold text-sm"
-          >
+          <button onClick={commit} disabled={busy} className={btnPrimary}>
             {busy ? "Posting…" : "Post billing & close PO"}
           </button>
         </div>

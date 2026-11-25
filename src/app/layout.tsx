@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/Nav";
-import TickerBar from "@/components/TickerBar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,16 +20,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
-    >
-      <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-100">
-        <TickerBar />
-        <div className="flex flex-1 min-h-0">
-          <Nav />
-          <main className="flex-1 min-w-0 p-8 overflow-y-auto">{children}</main>
-        </div>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+      <body className="min-h-full flex bg-slate-50 text-slate-900">
+        <Nav />
+        <main className="flex-1 min-w-0 overflow-y-auto">
+          <div className="max-w-6xl mx-auto p-8">{children}</div>
+        </main>
       </body>
     </html>
   );

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { Badge, btnPrimary, btnSecondary, Callout, Card, EmptyState, PageHeader, thClass, tdClass, trClass } from "@/components/ui";
 
 type ComputedLine = {
   item_code: string;
@@ -45,78 +46,72 @@ export default function OrdersPage() {
     setPlacedOrderId(data.orderId);
   }
 
-  if (loading) return <div className="text-zinc-500">Computing order…</div>;
-  if (!result) return <div className="text-red-400">Failed to compute order.</div>;
+  if (loading) return <div className="text-slate-400 text-sm">Computing order…</div>;
+  if (!result) return <Callout tone="red">Failed to compute order.</Callout>;
 
   return (
     <div className="max-w-4xl">
-      <div className="text-emerald-500 font-mono text-xs tracking-widest mb-1">02 GPI ORDER</div>
-      <h1 className="text-2xl font-bold mb-1">Place supplier order</h1>
-      <p className="text-zinc-500 text-sm mb-6">
-        Order qty = demand + buffer − stock, buffer = demand ÷ {result.openPoCount} open PO(s), rounded to nearest 20.
-      </p>
+      <PageHeader
+        title="Place supplier order"
+        description={`Order qty = demand + buffer − stock, buffer = demand ÷ ${result.openPoCount} open PO(s), rounded to the nearest 20.`}
+      />
 
       {result.lines.length === 0 ? (
-        <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-6 text-zinc-400 text-sm">
-          No order needed right now — either no open POs, or stock already covers demand + buffer for every item.
-        </div>
+        <Card className="p-6">
+          <EmptyState>No order needed right now — either no open POs, or stock already covers demand + buffer for every item.</EmptyState>
+        </Card>
       ) : (
         <>
-          <div className="bg-zinc-950 border border-zinc-800 rounded-lg overflow-hidden mb-4">
-            <table className="w-full text-sm">
-              <thead className="bg-zinc-900 text-zinc-400 text-left">
+          <Card className="overflow-hidden mb-4">
+            <table className="w-full">
+              <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="p-2 pl-3">Item</th>
-                  <th className="p-2 text-right">Demand</th>
-                  <th className="p-2 text-right">Buffer</th>
-                  <th className="p-2 text-right">Stock</th>
-                  <th className="p-2 text-right">Order (packs)</th>
-                  <th className="p-2 text-right pr-3">M</th>
+                  <th className={thClass}>Item</th>
+                  <th className={`${thClass} text-right`}>Demand</th>
+                  <th className={`${thClass} text-right`}>Buffer</th>
+                  <th className={`${thClass} text-right`}>Stock</th>
+                  <th className={`${thClass} text-right`}>Order (packs)</th>
+                  <th className={`${thClass} text-right`}>M</th>
                 </tr>
               </thead>
               <tbody>
                 {result.lines.map((l) => (
-                  <tr key={l.item_code} className="border-t border-zinc-800">
-                    <td className="p-2 pl-3">{l.tally_name}</td>
-                    <td className="p-2 text-right text-zinc-400">{l.demand}</td>
-                    <td className="p-2 text-right text-zinc-400">{l.buffer}</td>
-                    <td className="p-2 text-right text-zinc-400">{l.stock}</td>
-                    <td className="p-2 text-right font-semibold">{l.order_packs}</td>
-                    <td className="p-2 text-right pr-3 text-emerald-400">{l.order_m}</td>
+                  <tr key={l.item_code} className={`${trClass} ${l.order_packs === 0 ? "opacity-50" : ""}`}>
+                    <td className={`${tdClass} font-medium text-slate-900`}>{l.tally_name}</td>
+                    <td className={`${tdClass} text-right tabular-nums`}>{l.demand}</td>
+                    <td className={`${tdClass} text-right tabular-nums`}>{l.buffer}</td>
+                    <td className={`${tdClass} text-right tabular-nums`}>{l.stock}</td>
+                    <td className={`${tdClass} text-right tabular-nums font-semibold`}>{l.order_packs}</td>
+                    <td className={`${tdClass} text-right tabular-nums text-emerald-600 font-medium`}>{l.order_m}</td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
-                <tr className="border-t-2 border-zinc-700 font-semibold">
-                  <td className="p-2 pl-3" colSpan={5}>
+                <tr className="border-t-2 border-slate-200 bg-slate-50">
+                  <td className={`${tdClass} font-semibold`} colSpan={5}>
                     Total
                   </td>
-                  <td className="p-2 text-right pr-3 text-emerald-400">{result.totalM}M</td>
+                  <td className={`${tdClass} text-right tabular-nums text-emerald-700 font-bold`}>{result.totalM}M</td>
                 </tr>
               </tfoot>
             </table>
-          </div>
+          </Card>
 
           {placedOrderId === null ? (
-            <button
-              onClick={place}
-              disabled={placing}
-              className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black disabled:opacity-50 rounded-md font-semibold text-sm"
-            >
+            <button onClick={place} disabled={placing} className={btnPrimary}>
               {placing ? "Placing…" : "Approve & place order"}
             </button>
           ) : (
-            <div className="bg-emerald-950/50 border border-emerald-800 rounded-lg p-4 flex items-center justify-between">
-              <span className="text-emerald-300 text-sm">
-                Order #{placedOrderId} placed ({result.totalM}M).
-              </span>
-              <a
-                href={`/api/gpi-order/${placedOrderId}/export`}
-                className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 rounded-md text-sm font-medium"
-              >
-                ⬇ Download BANGALORE MT DISPATCH format
-              </a>
-            </div>
+            <Callout tone="emerald">
+              <div className="flex items-center justify-between">
+                <span>
+                  Order #{placedOrderId} placed ({result.totalM}M).
+                </span>
+                <a href={`/api/gpi-order/${placedOrderId}/export`} className={btnSecondary}>
+                  ⬇ Download Bangalore dispatch format
+                </a>
+              </div>
+            </Callout>
           )}
         </>
       )}

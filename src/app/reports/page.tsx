@@ -1,7 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
+import { btnPrimary, btnSecondary, Card, EmptyState, inputClass, Label, PageHeader, thClass, tdClass, trClass } from "@/components/ui";
 
 type ReportType = "sales" | "ledger" | "aging";
+
+const reportLabels: Record<ReportType, string> = {
+  sales: "Sales pivot (by SKU, A→Z)",
+  ledger: "Stock ledger",
+  aging: "Outstanding aging",
+};
 
 export default function ReportsPage() {
   const [type, setType] = useState<ReportType>("sales");
@@ -46,87 +53,77 @@ export default function ReportsPage() {
 
   return (
     <div className="max-w-5xl">
-      <div className="text-emerald-500 font-mono text-xs tracking-widest mb-1">05 REPORTS</div>
-      <h1 className="text-2xl font-bold mb-1">Reports</h1>
-      <p className="text-zinc-500 text-sm mb-6">Pick a report and date range, then view it live or download as CSV.</p>
+      <PageHeader title="Reports" description="Pick a report and date range, then view it live or download as CSV." />
 
-      <div className="flex gap-3 items-end mb-6 flex-wrap">
-        <div>
-          <label className="text-sm block mb-1">Report</label>
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value as ReportType)}
-            className="bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
-          >
-            <option value="sales">Sales pivot (by SKU, A→Z)</option>
-            <option value="ledger">Stock ledger</option>
-            <option value="aging">Outstanding aging</option>
-          </select>
-        </div>
-        {type !== "aging" && (
-          <>
-            <div>
-              <label className="text-sm block mb-1">From</label>
-              <input
-                type="date"
-                value={start}
-                onChange={(e) => setStart(e.target.value)}
-                className="bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-sm block mb-1">To</label>
-              <input
-                type="date"
-                value={end}
-                onChange={(e) => setEnd(e.target.value)}
-                className="bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
-              />
-            </div>
-          </>
-        )}
-        <button onClick={run} disabled={busy} className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-black disabled:opacity-50 rounded-md text-sm font-medium">
-          {busy ? "Running…" : "Run report"}
-        </button>
-        {rows && rows.length > 0 && (
-          <button onClick={downloadCsv} className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 rounded-md text-sm font-medium">
-            ⬇ Download CSV
+      <Card className="p-5 mb-6">
+        <div className="flex gap-4 items-end flex-wrap">
+          <div className="w-64">
+            <Label>Report</Label>
+            <select value={type} onChange={(e) => setType(e.target.value as ReportType)} className={inputClass}>
+              {(Object.keys(reportLabels) as ReportType[]).map((t) => (
+                <option key={t} value={t}>
+                  {reportLabels[t]}
+                </option>
+              ))}
+            </select>
+          </div>
+          {type !== "aging" && (
+            <>
+              <div>
+                <Label>From</Label>
+                <input type="date" value={start} onChange={(e) => setStart(e.target.value)} className={inputClass} />
+              </div>
+              <div>
+                <Label>To</Label>
+                <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} className={inputClass} />
+              </div>
+            </>
+          )}
+          <button onClick={run} disabled={busy} className={btnPrimary}>
+            {busy ? "Running…" : "Run report"}
           </button>
-        )}
-      </div>
+          {rows && rows.length > 0 && (
+            <button onClick={downloadCsv} className={btnSecondary}>
+              ⬇ Download CSV
+            </button>
+          )}
+        </div>
+      </Card>
 
       {rows && (
-        <div className="bg-zinc-950 border border-zinc-800 rounded-lg overflow-hidden overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-zinc-900 text-zinc-400 text-left">
-              <tr>
-                {columns.map((c) => (
-                  <th key={c} className="p-2 pl-3 whitespace-nowrap">
-                    {c}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.length === 0 && (
+        <Card className="overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <td colSpan={columns.length || 1} className="p-4 text-center text-zinc-500">
-                    No rows in range.
-                  </td>
-                </tr>
-              )}
-              {rows.map((r, i) => (
-                <tr key={i} className="border-t border-zinc-800">
                   {columns.map((c) => (
-                    <td key={c} className="p-2 pl-3 whitespace-nowrap">
-                      {String(r[c] ?? "")}
-                    </td>
+                    <th key={c} className={`${thClass} whitespace-nowrap`}>
+                      {c.replace(/_/g, " ")}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {rows.length === 0 && (
+                  <tr>
+                    <td colSpan={columns.length || 1}>
+                      <EmptyState>No rows in range.</EmptyState>
+                    </td>
+                  </tr>
+                )}
+                {rows.map((r, i) => (
+                  <tr key={i} className={trClass}>
+                    {columns.map((c) => (
+                      <td key={c} className={`${tdClass} whitespace-nowrap`}>
+                        {String(r[c] ?? "")}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       )}
     </div>
   );

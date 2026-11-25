@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { btnPrimary, btnGhost, Callout, Card, EmptyState, inputClass, Label, PageHeader, thClass, tdClass, trClass } from "@/components/ui";
 
 type Invoice = { id: number; invoice_number: string; invoice_amount: number; date_of_invoice: string | null };
 
@@ -49,7 +50,11 @@ export default function PaymentsPage() {
     const data = await res.json();
     setBusy(false);
     if (res.ok) {
-      setStatus(data.fullyPaid ? `Invoice ${selected.invoice_number} fully paid and removed from outstanding.` : `Partial payment recorded against ${selected.invoice_number}.`);
+      setStatus(
+        data.fullyPaid
+          ? `Invoice ${selected.invoice_number} fully paid and removed from outstanding.`
+          : `Partial payment recorded against ${selected.invoice_number}.`
+      );
       setSelected(null);
       load();
     } else {
@@ -57,43 +62,43 @@ export default function PaymentsPage() {
     }
   }
 
+  const total = (Number(amount) || 0) + (Number(tds) || 0);
+
   return (
     <div className="max-w-4xl">
-      <div className="text-emerald-500 font-mono text-xs tracking-widest mb-1">04 PAYMENTS</div>
-      <h1 className="text-2xl font-bold mb-1">Reconcile an HSBC payment advice</h1>
-      <p className="text-zinc-500 text-sm mb-6">
-        Match the payment to its outstanding invoice. A fully-settled invoice (payment + TDS) is removed from
-        Outstanding entirely, not just marked paid.
-      </p>
+      <PageHeader
+        title="Reconcile a payment"
+        description="Match an HSBC payment advice to its outstanding invoice. A fully-settled invoice (payment + TDS) is removed from Outstanding entirely, not just marked paid."
+      />
 
       {!selected && (
-        <div className="bg-zinc-950 border border-zinc-800 rounded-lg overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-zinc-900 text-zinc-400 text-left">
+        <Card className="overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="p-2 pl-3">Invoice</th>
-                <th className="p-2">Date</th>
-                <th className="p-2 text-right pr-3">Amount</th>
-                <th className="p-2 pr-3"></th>
+                <th className={thClass}>Invoice</th>
+                <th className={thClass}>Date</th>
+                <th className={`${thClass} text-right`}>Amount</th>
+                <th className={thClass}></th>
               </tr>
             </thead>
             <tbody>
               {invoices.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="p-4 text-center text-zinc-500">
-                    No outstanding invoices.
+                  <td colSpan={4}>
+                    <EmptyState>No outstanding invoices.</EmptyState>
                   </td>
                 </tr>
               )}
               {invoices.map((inv) => (
-                <tr key={inv.id} className="border-t border-zinc-800">
-                  <td className="p-2 pl-3 font-mono">{inv.invoice_number}</td>
-                  <td className="p-2">{inv.date_of_invoice}</td>
-                  <td className="p-2 text-right pr-3">₹{inv.invoice_amount.toLocaleString("en-IN")}</td>
-                  <td className="p-2 pr-3 text-right">
+                <tr key={inv.id} className={trClass}>
+                  <td className={`${tdClass} font-medium text-slate-900`}>{inv.invoice_number}</td>
+                  <td className={tdClass}>{inv.date_of_invoice}</td>
+                  <td className={`${tdClass} text-right tabular-nums`}>₹{inv.invoice_amount.toLocaleString("en-IN")}</td>
+                  <td className={`${tdClass} text-right`}>
                     <button
                       onClick={() => selectInvoice(inv)}
-                      className="px-3 py-1 bg-emerald-500 hover:bg-emerald-400 text-black rounded-md text-xs font-semibold"
+                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-semibold transition-colors"
                     >
                       Record payment
                     </button>
@@ -102,75 +107,58 @@ export default function PaymentsPage() {
               ))}
             </tbody>
           </table>
-        </div>
+        </Card>
       )}
 
       {selected && (
-        <div>
-          <button onClick={() => setSelected(null)} className="text-zinc-500 hover:text-zinc-300 text-sm mb-4">
+        <div className="space-y-5">
+          <button onClick={() => setSelected(null)} className={btnGhost}>
             ← Back to outstanding
           </button>
-          <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 mb-4">
-            <div className="font-mono font-semibold mb-1">{selected.invoice_number}</div>
-            <div className="text-zinc-500 text-sm">Outstanding: ₹{selected.invoice_amount.toLocaleString("en-IN")}</div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="text-sm block mb-1">Amount received (₹)</label>
-              <input
-                type="number"
-                step="0.01"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
-              />
+          <Card className="p-5">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-slate-900">{selected.invoice_number}</span>
+              <span className="text-slate-500 text-sm">Outstanding: ₹{selected.invoice_amount.toLocaleString("en-IN")}</span>
             </div>
-            <div>
-              <label className="text-sm block mb-1">TDS deducted (₹)</label>
-              <input
-                type="number"
-                step="0.01"
-                value={tds}
-                onChange={(e) => setTds(e.target.value)}
-                placeholder="0"
-                className="w-full bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-sm block mb-1">Payment Date</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="text-sm block mb-1">Reference (optional)</label>
-              <input
-                value={reference}
-                onChange={(e) => setReference(e.target.value)}
-                placeholder="HSBC advice ref / UTR"
-                className="w-full bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
-              />
-            </div>
-          </div>
+          </Card>
 
-          <div className="text-zinc-500 text-xs mb-4">
-            Total settling this invoice: ₹{((Number(amount) || 0) + (Number(tds) || 0)).toLocaleString("en-IN")}
-            {(Number(amount) || 0) + (Number(tds) || 0) < selected.invoice_amount - 0.5 && (
-              <span className="text-amber-400"> — less than the outstanding amount; this will be recorded as a partial payment.</span>
+          <Card className="p-5">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Amount received (₹)</Label>
+                <input type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className={inputClass} />
+              </div>
+              <div>
+                <Label hint="Optional">TDS deducted (₹)</Label>
+                <input type="number" step="0.01" value={tds} onChange={(e) => setTds(e.target.value)} placeholder="0" className={inputClass} />
+              </div>
+              <div>
+                <Label>Payment Date</Label>
+                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputClass} />
+              </div>
+              <div>
+                <Label hint="Optional">Reference</Label>
+                <input
+                  value={reference}
+                  onChange={(e) => setReference(e.target.value)}
+                  placeholder="HSBC advice ref / UTR"
+                  className={inputClass}
+                />
+              </div>
+            </div>
+          </Card>
+
+          <div className="text-slate-500 text-sm">
+            Total settling this invoice: <span className="font-semibold text-slate-800">₹{total.toLocaleString("en-IN")}</span>
+            {total < selected.invoice_amount - 0.5 && (
+              <span className="text-amber-600"> — less than outstanding; recorded as a partial payment.</span>
             )}
           </div>
 
-          {status && <div className="mb-4 text-sm text-amber-300">{status}</div>}
+          {status && <Callout tone={status.startsWith("Error") ? "red" : "emerald"}>{status}</Callout>}
 
-          <button
-            onClick={post}
-            disabled={busy}
-            className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black disabled:opacity-50 rounded-md font-semibold text-sm"
-          >
+          <button onClick={post} disabled={busy} className={btnPrimary}>
             {busy ? "Posting…" : "Post payment"}
           </button>
         </div>

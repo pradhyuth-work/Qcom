@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
+import { btnPrimary, btnSecondary, Callout, Card, inputClass, Label, PageHeader } from "@/components/ui";
 
 type Item = { item_code: string; tally_name: string; qty_packs: number; qty_m: number; sticks_per_pack: number };
-
 type LineInput = { itemCode: string; qtyM: string };
 
 export default function Inwarding() {
@@ -33,7 +33,6 @@ export default function Inwarding() {
   }
 
   function applyBulk() {
-    // Expect lines like: ITEM CODE or NAME, QTY IN M  (comma or tab separated)
     const rows = bulkText
       .split(/\r?\n/)
       .map((r) => r.trim())
@@ -76,7 +75,7 @@ export default function Inwarding() {
     const data = await res.json();
     setPosting(false);
     if (res.ok) {
-      setStatus(`Posted ${data.posted} line(s) to stock. Reload to see updated balances.`);
+      setStatus(`Posted ${data.posted} line(s) to stock.`);
       setLines([{ itemCode: "", qtyM: "" }]);
       setReference("");
       fetch("/api/items").then((r) => r.json()).then(setItems);
@@ -87,107 +86,93 @@ export default function Inwarding() {
 
   return (
     <div className="max-w-3xl">
-      <div className="text-emerald-500 font-mono text-xs tracking-widest mb-1">01 INWARDING</div>
-      <h1 className="text-2xl font-bold mb-1">Record inventory purchase</h1>
-      <p className="text-zinc-500 text-sm mb-6">
-        Post a GPI receipt and increase warehouse stock immediately. Quantities are in M (mille = 1000 sticks), same as the delivery note.
-      </p>
+      <PageHeader
+        title="Record a GPI receipt"
+        description="Post a supplier delivery and increase warehouse stock immediately. Quantities are in M (mille = 1000 sticks), same as the delivery note."
+      />
 
-      <div className="flex gap-3 mb-6">
-        <button
-          onClick={() => setShowBulk((v) => !v)}
-          className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 rounded-md text-sm font-medium"
-        >
-          ⬆ Bulk entry from CSV
-        </button>
-      </div>
-
-      {showBulk && (
-        <div className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 mb-6">
-          <p className="text-zinc-400 text-xs mb-2">
-            One line per product: <code className="text-zinc-300">Item Code or Name, Qty in M</code>
-          </p>
-          <textarea
-            value={bulkText}
-            onChange={(e) => setBulkText(e.target.value)}
-            rows={6}
-            className="w-full bg-zinc-950 border border-zinc-700 rounded-md p-3 text-sm font-mono"
-            placeholder={"IT01, 8.0\nIT33, 33.28"}
-          />
-          <button
-            onClick={applyBulk}
-            className="mt-3 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-black rounded-md text-sm font-semibold"
-          >
-            Parse into product list
+      <Card className="p-6 space-y-5">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold text-slate-700">Products on this receipt</span>
+          <button onClick={() => setShowBulk((v) => !v)} className="text-sm text-emerald-700 hover:text-emerald-800 font-medium">
+            {showBulk ? "Hide bulk entry" : "Paste multiple lines at once"}
           </button>
         </div>
-      )}
 
-      <div className="mb-2 font-semibold text-sm">Products on this receipt</div>
-      <div className="space-y-2 mb-4">
-        {lines.map((line, i) => {
-          const item = items.find((it) => it.item_code === line.itemCode);
-          const projectedM = item ? Math.round((item.qty_m + Number(line.qtyM || 0)) * 100) / 100 : null;
-          return (
-            <div key={i} className="flex gap-2 items-center">
-              <select
-                value={line.itemCode}
-                onChange={(e) => updateLine(i, "itemCode", e.target.value)}
-                className="flex-1 bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
-              >
-                <option value="">Select product…</option>
-                {items.map((it) => (
-                  <option key={it.item_code} value={it.item_code}>
-                    {it.tally_name} · {it.qty_m}M in stock
-                  </option>
-                ))}
-              </select>
-              <input
-                type="number"
-                step="0.01"
-                value={line.qtyM}
-                onChange={(e) => updateLine(i, "qtyM", e.target.value)}
-                placeholder="Qty (M)"
-                className="w-32 bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
-              />
-              {item && (
-                <span className="text-zinc-600 text-xs w-28">→ {projectedM}M</span>
-              )}
-              <button onClick={() => removeLine(i)} className="text-zinc-500 hover:text-red-400 px-2">
-                ✕
-              </button>
-            </div>
-          );
-        })}
-      </div>
-      <button onClick={addLine} className="text-emerald-400 text-sm hover:text-emerald-300 mb-6">
-        + Add another product
-      </button>
+        {showBulk && (
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+            <p className="text-slate-500 text-xs mb-2">
+              One line per product: <code className="bg-white border border-slate-200 rounded px-1 py-0.5">Item Code or Name, Qty in M</code>
+            </p>
+            <textarea
+              value={bulkText}
+              onChange={(e) => setBulkText(e.target.value)}
+              rows={5}
+              className={`${inputClass} font-mono`}
+              placeholder={"IT01, 8.0\nIT33, 33.28"}
+            />
+            <button onClick={applyBulk} className={`${btnSecondary} mt-3`}>
+              Parse into product list
+            </button>
+          </div>
+        )}
 
-      <div className="mb-6">
-        <label className="flex justify-between text-sm mb-1">
-          <span>Supplier / bill reference</span>
-          <span className="text-zinc-500">Optional</span>
-        </label>
-        <input
-          value={reference}
-          onChange={(e) => setReference(e.target.value)}
-          placeholder="e.g. GPI invoice number, or leave blank if not legible"
-          className="w-full bg-zinc-950 border border-zinc-700 rounded-md px-3 py-2 text-sm"
-        />
-      </div>
+        <div className="space-y-2">
+          {lines.map((line, i) => {
+            const item = items.find((it) => it.item_code === line.itemCode);
+            const projectedM = item ? Math.round((item.qty_m + Number(line.qtyM || 0)) * 100) / 100 : null;
+            return (
+              <div key={i} className="flex gap-2 items-center">
+                <select
+                  value={line.itemCode}
+                  onChange={(e) => updateLine(i, "itemCode", e.target.value)}
+                  className={`${inputClass} flex-1`}
+                >
+                  <option value="">Select product…</option>
+                  {items.map((it) => (
+                    <option key={it.item_code} value={it.item_code}>
+                      {it.tally_name} · {it.qty_m}M in stock
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={line.qtyM}
+                  onChange={(e) => updateLine(i, "qtyM", e.target.value)}
+                  placeholder="Qty (M)"
+                  className={`${inputClass} w-32`}
+                />
+                {item && <span className="text-slate-400 text-xs w-28 shrink-0">→ {projectedM}M</span>}
+                <button onClick={() => removeLine(i)} className="text-slate-400 hover:text-red-500 px-1 text-lg leading-none">
+                  ×
+                </button>
+              </div>
+            );
+          })}
+        </div>
+        <button onClick={addLine} className="text-sm text-emerald-700 hover:text-emerald-800 font-medium">
+          + Add another product
+        </button>
 
-      <p className="text-zinc-500 text-xs mb-3">Every line is posted together — if one fails, none are applied.</p>
+        <div>
+          <Label hint="Optional">Supplier / bill reference</Label>
+          <input
+            value={reference}
+            onChange={(e) => setReference(e.target.value)}
+            placeholder="e.g. GPI invoice number, or leave blank if not legible"
+            className={inputClass}
+          />
+        </div>
 
-      {status && <div className="mb-4 text-sm text-amber-300">{status}</div>}
+        <p className="text-slate-400 text-xs">Every line is posted together — if one fails, none are applied.</p>
 
-      <button
-        onClick={submit}
-        disabled={posting}
-        className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black disabled:opacity-50 rounded-md font-semibold text-sm"
-      >
-        {posting ? "Posting…" : "Post purchase inward"}
-      </button>
+        {status && <Callout tone={status.startsWith("Error") ? "red" : "emerald"}>{status}</Callout>}
+
+        <button onClick={submit} disabled={posting} className={btnPrimary}>
+          {posting ? "Posting…" : "Post purchase inward"}
+        </button>
+      </Card>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Panel, Pill, StatBlock, thClass } from "@/components/ui";
+import { Badge, Card, EmptyState, PageHeader, StatCard, tdClass, thClass, trClass } from "@/components/ui";
 
 type StockRow = {
   item_code: string;
@@ -21,7 +21,7 @@ type DashboardData = {
 };
 
 function inr(n: number) {
-  return "₹" + n.toLocaleString("en-IN", { maximumFractionDigits: 2 });
+  return "₹" + n.toLocaleString("en-IN", { maximumFractionDigits: 0 });
 }
 
 export default function Dashboard() {
@@ -33,101 +33,85 @@ export default function Dashboard() {
       .then(setData);
   }, []);
 
-  if (!data) return <div className="text-zinc-600 font-mono text-sm">Loading…</div>;
+  if (!data) return <div className="text-slate-400 text-sm">Loading…</div>;
 
   return (
-    <div className="max-w-6xl space-y-8">
-      <div>
-        <div className="flex items-center gap-3 mb-2">
-          <Pill tone="emerald">Live</Pill>
-          <span className="text-zinc-600 text-xs font-mono">{data.customer}</span>
-        </div>
-        <h1 className="text-4xl font-bold tracking-tight mb-2">
-          One ledger. <span className="text-emerald-400">Zero mismatches.</span>
-        </h1>
-        <p className="text-zinc-500 text-sm max-w-2xl">
-          Stock, AR, and open POs for <span className="text-zinc-300">{data.customer}</span> — updates the instant any
-          action posts.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <PageHeader title="Dashboard" description={`Live view for ${data.customer} — updates the instant any action posts.`} />
 
       {data.flags.length > 0 && (
-        <Panel className="border-red-900 bg-red-950/30 p-4">
-          <div className="text-red-300 font-semibold text-sm mb-2 font-mono uppercase tracking-wider text-xs">Flagged</div>
-          <ul className="text-red-200 text-sm space-y-1">
+        <Card className="border-red-200 bg-red-50 p-4">
+          <div className="text-red-700 font-semibold text-sm mb-2">Needs attention</div>
+          <ul className="text-red-700 text-sm space-y-1">
             {data.flags.map((f, i) => (
               <li key={i}>• {f}</li>
             ))}
           </ul>
-        </Panel>
+        </Card>
       )}
 
       <div className="grid grid-cols-4 gap-4">
-        <StatBlock label="AR Ledger Balance" value={inr(data.arBalance)} tone="emerald" />
-        <StatBlock label="Outstanding AR" value={inr(data.outstanding.total)} sub={`${data.outstanding.cnt} invoices`} />
-        <StatBlock label="Open POs" value={String(data.openPOs.length)} />
-        <StatBlock
+        <StatCard label="AR Ledger Balance" value={inr(data.arBalance)} tone="emerald" />
+        <StatCard label="Outstanding AR" value={inr(data.outstanding.total)} sub={`${data.outstanding.cnt} invoices`} />
+        <StatCard label="Open POs" value={String(data.openPOs.length)} />
+        <StatCard
           label="Last GPI Order"
           value={data.lastGpiOrder ? `${data.lastGpiOrder.total_m}M` : "—"}
           sub={data.lastGpiOrder ? data.lastGpiOrder.date : undefined}
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-2 gap-6">
         <section>
-          <h2 className="text-xs font-mono uppercase tracking-wider text-zinc-500 mb-3">Open POs</h2>
-          <Panel className="overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-zinc-900 border-b border-zinc-800">
+          <h2 className="text-sm font-semibold text-slate-700 mb-3">Open POs</h2>
+          <Card className="overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
                   <th className={thClass}>PO No</th>
                   <th className={thClass}>Location</th>
-                  <th className={`${thClass} text-right pr-3`}>Amount</th>
+                  <th className={`${thClass} text-right`}>Amount</th>
                 </tr>
               </thead>
               <tbody>
                 {data.openPOs.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="p-4 text-center text-zinc-600">
-                      No open POs
+                    <td colSpan={3}>
+                      <EmptyState>No open POs</EmptyState>
                     </td>
                   </tr>
                 )}
                 {data.openPOs.map((po) => (
-                  <tr key={po.po_no} className="border-t border-zinc-900 hover:bg-zinc-900/50">
-                    <td className="p-2 pl-3 font-mono text-zinc-300">{po.po_no}</td>
-                    <td className="p-2 text-zinc-400">{po.del_location}</td>
-                    <td className="p-2 text-right pr-3 font-mono tabular-nums">{inr(po.po_amount)}</td>
+                  <tr key={po.po_no} className={trClass}>
+                    <td className={`${tdClass} font-medium text-slate-900`}>{po.po_no}</td>
+                    <td className={tdClass}>{po.del_location}</td>
+                    <td className={`${tdClass} text-right tabular-nums`}>{inr(po.po_amount)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </Panel>
+          </Card>
         </section>
 
         <section>
-          <h2 className="text-xs font-mono uppercase tracking-wider text-zinc-500 mb-3">Recent ledger activity</h2>
-          <Panel className="overflow-hidden max-h-80 overflow-y-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-zinc-900 border-b border-zinc-800 sticky top-0">
+          <h2 className="text-sm font-semibold text-slate-700 mb-3">Recent ledger activity</h2>
+          <Card className="overflow-hidden max-h-80 overflow-y-auto">
+            <table className="w-full">
+              <thead className="bg-slate-50 border-b border-slate-200 sticky top-0">
                 <tr>
                   <th className={thClass}>Date</th>
                   <th className={thClass}>Event</th>
                   <th className={thClass}>Item</th>
-                  <th className={`${thClass} text-right pr-3`}>Qty</th>
+                  <th className={`${thClass} text-right`}>Qty</th>
                 </tr>
               </thead>
               <tbody>
                 {data.recentLedger.map((l) => (
-                  <tr key={l.id} className="border-t border-zinc-900 hover:bg-zinc-900/50">
-                    <td className="p-2 pl-3 font-mono text-zinc-500 text-xs">{l.date}</td>
-                    <td className="p-2 text-zinc-400 text-xs">{l.event_type}</td>
-                    <td className="p-2 font-mono">{l.item_code}</td>
-                    <td
-                      className={`p-2 text-right pr-3 font-mono tabular-nums ${
-                        l.qty_signed < 0 ? "text-red-400" : "text-emerald-400"
-                      }`}
-                    >
+                  <tr key={l.id} className={trClass}>
+                    <td className={`${tdClass} text-slate-500 text-xs`}>{l.date}</td>
+                    <td className={`${tdClass} text-slate-500 text-xs`}>{l.event_type}</td>
+                    <td className={`${tdClass} font-medium`}>{l.item_code}</td>
+                    <td className={`${tdClass} text-right tabular-nums font-medium ${l.qty_signed < 0 ? "text-red-600" : "text-emerald-600"}`}>
                       {l.qty_signed > 0 ? "+" : ""}
                       {l.qty_signed}
                     </td>
@@ -135,38 +119,34 @@ export default function Dashboard() {
                 ))}
               </tbody>
             </table>
-          </Panel>
+          </Card>
         </section>
       </div>
 
       <section>
-        <h2 className="text-xs font-mono uppercase tracking-wider text-zinc-500 mb-3">Stock on hand</h2>
-        <Panel className="overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-zinc-900 border-b border-zinc-800">
+        <h2 className="text-sm font-semibold text-slate-700 mb-3">Stock on hand</h2>
+        <Card className="overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
                 <th className={thClass}>Item</th>
                 <th className={`${thClass} text-right`}>Packs</th>
-                <th className={`${thClass} text-right pr-3`}>M</th>
+                <th className={`${thClass} text-right`}>M</th>
               </tr>
             </thead>
             <tbody>
               {data.stock.map((s) => (
-                <tr key={s.item_code} className="border-t border-zinc-900 hover:bg-zinc-900/50">
-                  <td className="p-2 pl-3">{s.tally_name}</td>
-                  <td
-                    className={`p-2 text-right font-mono tabular-nums ${
-                      s.qty_packs < 0 ? "text-red-400 font-semibold" : "text-zinc-200"
-                    }`}
-                  >
+                <tr key={s.item_code} className={trClass}>
+                  <td className={`${tdClass} font-medium text-slate-900`}>{s.tally_name}</td>
+                  <td className={`${tdClass} text-right tabular-nums ${s.qty_packs < 0 ? "text-red-600 font-semibold" : ""}`}>
                     {s.qty_packs.toLocaleString("en-IN")}
                   </td>
-                  <td className="p-2 text-right pr-3 font-mono tabular-nums text-zinc-500">{s.qty_m}</td>
+                  <td className={`${tdClass} text-right tabular-nums text-slate-500`}>{s.qty_m}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </Panel>
+        </Card>
       </section>
     </div>
   );
