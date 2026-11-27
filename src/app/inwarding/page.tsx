@@ -123,26 +123,30 @@ export default function Inwarding() {
             const projectedM = item ? Math.round((item.qty_m + Number(line.qtyM || 0)) * 100) / 100 : null;
             return (
               <div key={i} className="flex gap-2 items-center">
-                <select
-                  value={line.itemCode}
-                  onChange={(e) => updateLine(i, "itemCode", e.target.value)}
-                  className={`${inputClass} flex-1`}
-                >
-                  <option value="">Select product…</option>
-                  {items.map((it) => (
-                    <option key={it.item_code} value={it.item_code}>
-                      {it.display_name} · {it.qty_m}M in stock
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={line.qtyM}
-                  onChange={(e) => updateLine(i, "qtyM", e.target.value)}
-                  placeholder="Qty (M)"
-                  className={`${inputClass} w-32`}
-                />
+                <div className="flex-1 min-w-0">
+                  <select
+                    value={line.itemCode}
+                    onChange={(e) => updateLine(i, "itemCode", e.target.value)}
+                    className={inputClass}
+                  >
+                    <option value="">Select product…</option>
+                    {items.map((it) => (
+                      <option key={it.item_code} value={it.item_code}>
+                        {it.display_name} · {it.qty_m}M in stock
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="w-32 shrink-0">
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={line.qtyM}
+                    onChange={(e) => updateLine(i, "qtyM", e.target.value)}
+                    placeholder="Qty (M)"
+                    className={inputClass}
+                  />
+                </div>
                 {item && <span className="text-slate-400 text-xs w-28 shrink-0">→ {projectedM}M</span>}
                 <button onClick={() => removeLine(i)} className="text-slate-400 hover:text-red-500 px-1 text-lg leading-none">
                   ×
