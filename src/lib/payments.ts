@@ -41,7 +41,11 @@ export function postPayment(
     const lastBalRow = db
       .prepare(`SELECT balance FROM ar_ledger WHERE customer_id = ? ORDER BY id DESC LIMIT 1`)
       .get(customerId) as { balance: number } | undefined;
-    const newBalance = (lastBalRow?.balance ?? 0) - amount - tds;
+    // Balance is reduced by the net credit only -- TDS is logged alongside for tax
+    // reconciliation but doesn't additionally reduce the balance (matches the real
+    // ledger's own convention: the invoice's gross Debit is fully closed out by net
+    // credit + the TDS the payer already remitted to the tax authority on our behalf).
+    const newBalance = (lastBalRow?.balance ?? 0) - amount;
     db.prepare(
       `INSERT INTO ar_ledger (customer_id, date, invoice_no, narration, credit, tds, balance, remarks)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
