@@ -5,11 +5,11 @@ import { btnPrimary, btnSecondary, Card, EmptyState, inputClass, Label, PageHead
 type ReportType = "pivot" | "coverage" | "sales" | "ledger" | "aging";
 
 const reportLabels: Record<ReportType, string> = {
-  pivot: "PO-wise Pivot Report (by location)",
+  pivot: "Open PO Pivot Reports",
   coverage: "Stock Coverage Summary",
-  sales: "Sales / Fill-rate Pivot (by SKU, A→Z)",
+  sales: "Sales Pivot",
   ledger: "Stock Ledger",
-  aging: "Outstanding AR Aging",
+  aging: "Outstanding Aging",
 };
 
 const needsDateRange: Record<ReportType, boolean> = {
