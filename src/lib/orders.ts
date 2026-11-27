@@ -38,7 +38,7 @@ export function combinedOpenDemand(): Record<string, number> {
 
 export type ComputedOrderLine = {
   item_code: string;
-  tally_name: string;
+  display_name: string;
   demand: number;
   buffer: number;
   stock: number;
@@ -76,7 +76,7 @@ export function computeGpiOrder(): { lines: ComputedOrderLine[]; totalM: number;
     totalM += orderM;
     lines.push({
       item_code: item.item_code,
-      tally_name: item.tally_name,
+      display_name: item.display_name,
       demand: d,
       buffer: Math.round(buffer * 100) / 100,
       stock,
@@ -112,8 +112,11 @@ export function getGpiOrder(id: number) {
   const order = db.prepare(`SELECT * FROM gpi_orders WHERE id = ?`).get(id);
   const lines = db
     .prepare(
-      `SELECT gol.*, i.tally_name FROM gpi_order_lines gol
-       JOIN items i ON i.item_code = gol.item_code WHERE gpi_order_id = ?`
+      `SELECT gol.*, COALESCE(icc.sku_desc, i.tally_name) as display_name
+       FROM gpi_order_lines gol
+       JOIN items i ON i.item_code = gol.item_code
+       LEFT JOIN item_customer_codes icc ON icc.item_code = i.item_code
+       WHERE gpi_order_id = ?`
     )
     .all(id);
   return { order, lines };

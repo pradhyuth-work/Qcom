@@ -4,7 +4,7 @@ import { Badge, btnPrimary, btnSecondary, Callout, Card, EmptyState, PageHeader,
 
 type ComputedLine = {
   item_code: string;
-  tally_name: string;
+  display_name: string;
   demand: number;
   buffer: number;
   stock: number;
@@ -77,7 +77,7 @@ export default function OrdersPage() {
               <tbody>
                 {result.lines.map((l) => (
                   <tr key={l.item_code} className={`${trClass} ${l.order_packs === 0 ? "opacity-50" : ""}`}>
-                    <td className={`${tdClass} font-medium text-slate-900`}>{l.tally_name}</td>
+                    <td className={`${tdClass} font-medium text-slate-900`}>{l.display_name}</td>
                     <td className={`${tdClass} text-right tabular-nums`}>{l.demand}</td>
                     <td className={`${tdClass} text-right tabular-nums`}>{l.buffer}</td>
                     <td className={`${tdClass} text-right tabular-nums`}>{l.stock}</td>

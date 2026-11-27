@@ -6,7 +6,7 @@ type PoImportResult = {
   poNo: string;
   action: "created" | "identical" | "conflict" | "skipped_closed";
   lineCount: number;
-  diff?: { itemCode: string; tallyName: string; existingQty: number; newQty: number }[];
+  diff?: { itemCode: string; displayName: string; existingQty: number; newQty: number }[];
   unmatchedSkus?: string[];
 };
 
@@ -116,7 +116,7 @@ export default function PoIntakePage() {
                       <tbody>
                         {r.diff.map((d) => (
                           <tr key={d.itemCode}>
-                            <td className="py-0.5">{d.tallyName}</td>
+                            <td className="py-0.5">{d.displayName}</td>
                             <td className="text-right py-0.5">{d.existingQty}</td>
                             <td className="text-right py-0.5 font-semibold">{d.newQty}</td>
                           </tr>

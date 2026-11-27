@@ -4,7 +4,7 @@ import { Badge, Card, EmptyState, PageHeader, StatCard, tdClass, thClass, trClas
 
 type StockRow = {
   item_code: string;
-  tally_name: string;
+  display_name: string;
   qty_packs: number;
   qty_m: number;
 };
@@ -16,7 +16,7 @@ type DashboardData = {
   arBalance: number;
   outstanding: { total: number; cnt: number };
   lastGpiOrder: { id: number; date: string; total_m: number; status: string } | null;
-  recentLedger: { id: number; date: string; event_type: string; reference: string; item_code: string; qty_signed: number }[];
+  recentLedger: { id: number; date: string; event_type: string; reference: string; item_code: string; display_name: string; qty_signed: number }[];
   flags: string[];
 };
 
@@ -110,7 +110,7 @@ export default function Dashboard() {
                   <tr key={l.id} className={trClass}>
                     <td className={`${tdClass} text-slate-500 text-xs`}>{l.date}</td>
                     <td className={`${tdClass} text-slate-500 text-xs`}>{l.event_type}</td>
-                    <td className={`${tdClass} font-medium`}>{l.item_code}</td>
+                    <td className={`${tdClass} font-medium`}>{l.display_name}</td>
                     <td className={`${tdClass} text-right tabular-nums font-medium ${l.qty_signed < 0 ? "text-red-600" : "text-emerald-600"}`}>
                       {l.qty_signed > 0 ? "+" : ""}
                       {l.qty_signed}
@@ -137,7 +137,7 @@ export default function Dashboard() {
             <tbody>
               {data.stock.map((s) => (
                 <tr key={s.item_code} className={trClass}>
-                  <td className={`${tdClass} font-medium text-slate-900`}>{s.tally_name}</td>
+                  <td className={`${tdClass} font-medium text-slate-900`}>{s.display_name}</td>
                   <td className={`${tdClass} text-right tabular-nums ${s.qty_packs < 0 ? "text-red-600 font-semibold" : ""}`}>
                     {s.qty_packs.toLocaleString("en-IN")}
                   </td>

@@ -1,5 +1,4 @@
 import db from "./db";
-import { getItemByCode } from "./items";
 import { postLedgerLines } from "./stock";
 
 export type OpenPoWithLines = {
@@ -9,7 +8,7 @@ export type OpenPoWithLines = {
   po_amount: number | null;
   lines: {
     item_code: string;
-    tally_name: string;
+    display_name: string;
     sku_desc: string | null;
     qty_ordered: number;
     unit_base_cost: number | null;
@@ -27,9 +26,9 @@ export function getOpenPOsWithLines(customerId: number): OpenPoWithLines[] {
     ...po,
     lines: db
       .prepare(
-        `SELECT pl.item_code, i.tally_name, pl.sku_desc, pl.qty_ordered, pl.unit_base_cost
+        `SELECT pl.item_code, COALESCE(pl.sku_desc, i.tally_name) as display_name, pl.sku_desc, pl.qty_ordered, pl.unit_base_cost
          FROM po_lines pl JOIN items i ON i.item_code = pl.item_code
-         WHERE pl.po_no = ? ORDER BY i.tally_name`
+         WHERE pl.po_no = ? ORDER BY display_name`
       )
       .all(po.po_no) as OpenPoWithLines["lines"],
   }));
@@ -87,17 +86,16 @@ export function commitBilling(
   const tx = db.transaction(() => {
     postLedgerLines(ledgerLines);
 
-    const polines = db.prepare(`SELECT item_code, qty_ordered FROM po_lines WHERE po_no = ?`).all(poNo) as {
-      item_code: string;
-      qty_ordered: number;
-    }[];
+    const polines = db
+      .prepare(`SELECT pl.item_code, pl.sku_desc, pl.qty_ordered, i.tally_name FROM po_lines pl JOIN items i ON i.item_code = pl.item_code WHERE pl.po_no = ?`)
+      .all(poNo) as { item_code: string; sku_desc: string | null; qty_ordered: number; tally_name: string }[];
     const billedByCode = new Map(lines.map((l) => [l.itemCode, l.qtyBilled]));
     for (const pl of polines) {
       const billed = billedByCode.get(pl.item_code) ?? 0;
       updateLine.run(billed, poNo, pl.item_code);
-      const item = getItemByCode(pl.item_code)!;
       const fillRate = pl.qty_ordered > 0 ? Math.round((billed / pl.qty_ordered) * 1000) / 10 : 0;
-      insertSales.run(customerId, item.tally_name, poNo, invoiceNo, invoiceDate, pl.qty_ordered, billed, `${fillRate}%`);
+      const displayName = pl.sku_desc ?? pl.tally_name;
+      insertSales.run(customerId, displayName, poNo, invoiceNo, invoiceDate, pl.qty_ordered, billed, `${fillRate}%`);
     }
 
     const lastBalRow = db

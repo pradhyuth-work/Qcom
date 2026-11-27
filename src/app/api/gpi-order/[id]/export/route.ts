@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, connection } from "next/server";
 import { buildBangaloreExport } from "@/lib/export-bangalore";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  await connection();
   const { id } = await params;
   const orderId = Number(id);
   const buf = await buildBangaloreExport(orderId);

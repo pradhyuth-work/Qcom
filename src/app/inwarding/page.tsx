@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { btnPrimary, btnSecondary, Callout, Card, inputClass, Label, PageHeader } from "@/components/ui";
 
-type Item = { item_code: string; tally_name: string; qty_packs: number; qty_m: number; sticks_per_pack: number };
+type Item = { item_code: string; display_name: string; qty_packs: number; qty_m: number; sticks_per_pack: number };
 type LineInput = { itemCode: string; qtyM: string };
 
 export default function Inwarding() {
@@ -43,7 +43,7 @@ export default function Inwarding() {
       if (parts.length < 2) continue;
       const [key, qtyM] = parts;
       const match = items.find(
-        (i) => i.item_code.toLowerCase() === key.toLowerCase() || i.tally_name.toLowerCase() === key.toLowerCase()
+        (i) => i.item_code.toLowerCase() === key.toLowerCase() || i.display_name.toLowerCase() === key.toLowerCase()
       );
       if (match) newLines.push({ itemCode: match.item_code, qtyM });
     }
@@ -131,7 +131,7 @@ export default function Inwarding() {
                   <option value="">Select product…</option>
                   {items.map((it) => (
                     <option key={it.item_code} value={it.item_code}>
-                      {it.tally_name} · {it.qty_m}M in stock
+                      {it.display_name} · {it.qty_m}M in stock
                     </option>
                   ))}
                 </select>

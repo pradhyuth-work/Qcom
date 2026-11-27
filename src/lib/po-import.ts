@@ -76,7 +76,7 @@ export type PoImportResult = {
   poNo: string;
   action: "created" | "identical" | "conflict" | "skipped_closed";
   lineCount: number;
-  diff?: { itemCode: string; tallyName: string; existingQty: number; newQty: number }[];
+  diff?: { itemCode: string; displayName: string; existingQty: number; newQty: number }[];
   unmatchedSkus?: string[];
 };
 
@@ -104,14 +104,14 @@ function evaluatePo(customerId: number, poNo: string, poLines: ParsedPoLine[]): 
     | undefined;
 
   const unmatchedSkus: string[] = [];
-  const resolved: { itemCode: string; tallyName: string; qty: number; unitCost: number; skuDesc: string }[] = [];
+  const resolved: { itemCode: string; displayName: string; qty: number; unitCost: number; skuDesc: string }[] = [];
   for (const l of poLines) {
     const item = findItemByCustomerSkuDesc(customerId, l.skuDesc);
     if (!item) {
       unmatchedSkus.push(l.skuDesc);
       continue;
     }
-    resolved.push({ itemCode: item.item_code, tallyName: item.tally_name, qty: l.qty, unitCost: l.unitBaseCost, skuDesc: l.skuDesc });
+    resolved.push({ itemCode: item.item_code, displayName: l.skuDesc, qty: l.qty, unitCost: l.unitBaseCost, skuDesc: l.skuDesc });
   }
 
   if (existing?.status === "CLOSED") {
@@ -135,7 +135,7 @@ function evaluatePo(customerId: number, poNo: string, poLines: ParsedPoLine[]): 
     const nw = newByCode.get(code) ?? 0;
     if (ex !== nw) {
       const item = resolved.find((r) => r.itemCode === code);
-      diff.push({ itemCode: code, tallyName: item?.tallyName ?? code, existingQty: ex, newQty: nw });
+      diff.push({ itemCode: code, displayName: item?.displayName ?? code, existingQty: ex, newQty: nw });
     }
   }
 

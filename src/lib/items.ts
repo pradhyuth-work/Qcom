@@ -1,8 +1,10 @@
 import db from "./db";
+import { getDefaultCustomer } from "./customers";
 
 export type Item = {
   item_code: string;
   tally_name: string;
+  display_name: string;
   sticks_per_pack: number;
   unit_base_cost: number | null;
   pricing_source: string | null;
@@ -12,23 +14,45 @@ export type Item = {
 
 export type StockRow = Item & { qty_packs: number; qty_m: number };
 
-export function getAllItems(): Item[] {
-  return db.prepare(`SELECT * FROM items ORDER BY tally_name`).all() as Item[];
+/** `display_name` is the customer's own SKU description text -- shown everywhere in the UI
+ * instead of the internal `tally_name` shorthand, falling back to `tally_name` only when a
+ * customer hasn't been mapped to this item (untracked/legacy codes). */
+export function getAllItems(customerId?: number): Item[] {
+  const cid = customerId ?? getDefaultCustomer().id;
+  return db
+    .prepare(
+      `SELECT i.*, COALESCE(icc.sku_desc, i.tally_name) as display_name
+       FROM items i
+       LEFT JOIN item_customer_codes icc ON icc.item_code = i.item_code AND icc.customer_id = ?
+       ORDER BY display_name`
+    )
+    .all(cid) as Item[];
 }
 
-export function getStockRows(): StockRow[] {
+export function getStockRows(customerId?: number): StockRow[] {
+  const cid = customerId ?? getDefaultCustomer().id;
   const rows = db
     .prepare(
-      `SELECT i.*, s.qty_packs FROM items i
+      `SELECT i.*, s.qty_packs, COALESCE(icc.sku_desc, i.tally_name) as display_name
+       FROM items i
        JOIN stock_on_hand s ON s.item_code = i.item_code
-       ORDER BY i.tally_name`
+       LEFT JOIN item_customer_codes icc ON icc.item_code = i.item_code AND icc.customer_id = ?
+       ORDER BY display_name`
     )
-    .all() as (Item & { qty_packs: number })[];
+    .all(cid) as (Item & { qty_packs: number })[];
   return rows.map((r) => ({ ...r, qty_m: round2((r.qty_packs * r.sticks_per_pack) / 1000) }));
 }
 
-export function getItemByCode(code: string): Item | undefined {
-  return db.prepare(`SELECT * FROM items WHERE item_code = ?`).get(code) as Item | undefined;
+export function getItemByCode(code: string, customerId?: number): Item | undefined {
+  const cid = customerId ?? getDefaultCustomer().id;
+  return db
+    .prepare(
+      `SELECT i.*, COALESCE(icc.sku_desc, i.tally_name) as display_name
+       FROM items i
+       LEFT JOIN item_customer_codes icc ON icc.item_code = i.item_code AND icc.customer_id = ?
+       WHERE i.item_code = ?`
+    )
+    .get(cid, code) as Item | undefined;
 }
 
 /**
@@ -43,7 +67,7 @@ export function getItemByCode(code: string): Item | undefined {
 export function findItemByCustomerSkuDesc(customerId: number, skuDesc: string): Item | undefined {
   return db
     .prepare(
-      `SELECT i.* FROM items i
+      `SELECT i.*, icc.sku_desc as display_name FROM items i
        JOIN item_customer_codes icc ON icc.item_code = i.item_code
        WHERE icc.customer_id = ? AND icc.sku_desc = ? COLLATE NOCASE
        ORDER BY (i.unit_base_cost IS NOT NULL) DESC, i.tracked DESC LIMIT 1`

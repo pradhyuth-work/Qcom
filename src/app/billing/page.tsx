@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { btnPrimary, btnGhost, Callout, Card, EmptyState, inputClass, Label, PageHeader, thClass, tdClass, trClass } from "@/components/ui";
 
-type Line = { item_code: string; tally_name: string; sku_desc: string | null; qty_ordered: number; unit_base_cost: number | null };
+type Line = { item_code: string; display_name: string; sku_desc: string | null; qty_ordered: number; unit_base_cost: number | null };
 type OpenPo = { po_no: string; po_date: string | null; del_location: string | null; po_amount: number | null; lines: Line[] };
 
 export default function BillingPage() {
@@ -126,7 +126,7 @@ export default function BillingPage() {
                   const short = Number(billed[l.item_code]) < l.qty_ordered;
                   return (
                     <tr key={l.item_code} className="border-t border-slate-100">
-                      <td className="py-2.5 text-sm">{l.tally_name}</td>
+                      <td className="py-2.5 text-sm">{l.display_name}</td>
                       <td className="py-2.5 text-right text-sm text-slate-500 tabular-nums">{l.qty_ordered}</td>
                       <td className="py-2.5 text-right">
                         <input
